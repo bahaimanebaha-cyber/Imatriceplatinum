@@ -13,13 +13,11 @@
         }
         body { background: var(--bg); font-family: 'Inter', sans-serif; display: flex; height: 100vh; margin: 0; overflow: hidden; }
         
-        /* Sidebar */
         .sidebar { width: 260px; background: var(--dark); color: white; padding: 20px; display: flex; flex-direction: column; flex-shrink: 0; }
         .logo-area { border-bottom: 1px solid #334155; padding-bottom: 15px; margin-bottom: 15px; }
         .btn-m { background: #1e293b; color: white; padding: 12px; border: none; border-radius: 8px; margin-bottom: 8px; width: 100%; cursor: pointer; font-size: 0.85rem; transition: 0.3s; text-align: left; }
         .btn-m.active { background: var(--primary); }
 
-        /* Main Viewport */
         .viewport { flex: 1; display: flex; flex-direction: column; background: white; margin: 10px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow: hidden; }
         header { padding: 15px 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         #chat-flow { flex: 1; padding: 20px; overflow-y: auto; background: var(--light-bg); display: flex; flex-direction: column; gap: 15px; }
@@ -83,8 +81,9 @@
 
     <script>
         let nom = '', currentMod = 0, currentModName = '', currentLvl = 0, score = 0, currentAns = '', currentRule = '', usedExos = [];
-        // TON URL DE SCRIPT GOOGLE
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxfcjT2W17Mv1KWEh77XHV-rADMjwjGiWT3Z1VZJmvv6d_FZhXfbnfP1hryiTmrj_bB/exec';
+        
+        // URL de votre script Google mis à jour
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbw33x-xWQ3lSiE-NbTtOm04PJsFNT5iTpfuuzdY-980OZDNjyS_HDRS2oIUXlvU6T8IIw/exec';
 
         const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s/g, "");
 
@@ -122,7 +121,7 @@
         window.onload = () => {
             nom = prompt("Nom de l'élève :") || "Apprenant";
             document.getElementById('nomE').innerText = nom;
-            addMsg("bot", `Bonjour <b>${nom}</b> ! Bienvenue sur iMatrice Platinum. Choisis un module à gauche pour t'entraîner.`);
+            addMsg("bot", `Système <b>iMatrice Platinum</b> chargé. Sélectionnez un module.`);
             document.getElementById('ui').addEventListener('keypress', (e) => { if (e.key === 'Enter') checkAnswer(); });
         };
 
@@ -131,14 +130,13 @@
             document.querySelectorAll('.btn-m').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById('lvl-picker').style.display = 'flex';
-            addMsg("bot", `Module <b>${name}</b> sélectionné. Quel niveau souhaites-tu tester ?`);
+            addMsg("bot", `Module <b>${name}</b> prêt. Choisissez un niveau.`);
         }
 
         function startExercises(l, btn) {
             currentLvl = l;
             document.querySelectorAll('.lvl-btn').forEach(b => b.classList.remove('active-lvl'));
             btn.classList.add('active-lvl');
-            addMsg("bot", `C'est parti pour le niveau ${l} !`);
             generate();
         }
 
@@ -167,16 +165,16 @@
             if (isOk) {
                 score += (currentLvl * 10);
                 document.getElementById('xp').innerText = score;
-                addMsg("bot", "✨ <b>Excellent !</b> Tu progresses.");
+                addMsg("bot", "✨ <b>Excellent !</b>");
                 ruleBox.className = 'rule-box';
-                ruleBox.innerHTML = `<b>✅ Bravo !</b><br>${currentRule}`;
+                ruleBox.innerHTML = `<b>✅ Juste !</b><br>${currentRule}`;
             } else {
-                addMsg("bot", `❌ <b>Oups !</b> La bonne réponse était : <b>${currentAns}</b>.`);
+                addMsg("bot", `❌ <b>Oups !</b> La réponse était : <b>${currentAns}</b>.`);
                 ruleBox.className = 'rule-box rule-error';
                 ruleBox.innerHTML = `<b>📚 Rappel :</b><br>${currentRule}`;
             }
             input.value = '';
-            setTimeout(generate, 3000);
+            setTimeout(generate, 2500);
         }
 
         function addMsg(type, html) {
@@ -187,7 +185,12 @@
 
         async function sendReport() {
             const btn = document.getElementById('send-btn');
-            const data = { nom: nom, score: score, module: currentModName || "Général" };
+            // Les clés correspondent aux colonnes de votre script : nom, score, module
+            const data = { 
+                nom: nom, 
+                score: score.toString(), 
+                module: currentModName || "Général" 
+            };
 
             try {
                 btn.innerText = "⏳ Envoi...";
@@ -201,16 +204,15 @@
                     body: JSON.stringify(data)
                 });
 
-                addMsg("bot", "✅ <b>Génial !</b> Tes résultats ont été sauvegardés dans mon système. Continue comme ça !");
-                btn.innerText = "Résultats sauvegardés";
+                addMsg("bot", "✅ <b>Succès !</b> Tes résultats ont été envoyés à ton professeur.");
+                btn.innerText = "Résultats envoyés";
                 btn.style.background = "#94a3b8";
             } catch (error) {
-                addMsg("bot", "❌ Petit souci technique... Vérifie ta connexion.");
+                addMsg("bot", "❌ Erreur d'envoi. Réessaie plus tard.");
                 btn.disabled = false;
                 btn.innerText = "Réessayer l'envoi";
             }
         }
     </script>
 </body>
-</html>
 </html>

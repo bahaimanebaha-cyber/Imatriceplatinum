@@ -81,9 +81,6 @@
 
     <script>
         let nom = '', currentMod = 0, currentModName = '', currentLvl = 0, score = 0, currentAns = '', currentRule = '', usedExos = [];
-        
-        // URL de votre script Google mis à jour
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbw33x-xWQ3lSiE-NbTtOm04PJsFNT5iTpfuuzdY-980OZDNjyS_HDRS2oIUXlvU6T8IIw/exec';
 
         const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim().replace(/\s/g, "");
 
@@ -185,30 +182,38 @@
 
         async function sendReport() {
             const btn = document.getElementById('send-btn');
-            // Les clés correspondent aux colonnes de votre script : nom, score, module
-            const data = { 
-                nom: nom, 
-                score: score.toString(), 
-                module: currentModName || "Général" 
+            
+            const formData = {
+                access_key: "30e06224-d840-4de2-921e-bb9f7f76e816",
+                from_name: "iMatrice Platinum",
+                subject: "Score de " + nom + " - iMatrice",
+                nom_eleve: nom,
+                score_final: score + " XP",
+                module_etudie: currentModName || "Non sélectionné",
+                date_envoi: new Date().toLocaleString('fr-FR')
             };
 
             try {
                 btn.innerText = "⏳ Envoi...";
                 btn.disabled = true;
-                
-                await fetch(scriptURL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    cache: 'no-cache',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+
+                const response = await fetch("https://api.web3forms.com/submit", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                    body: JSON.stringify(formData)
                 });
 
-                addMsg("bot", "✅ <b>Succès !</b> Tes résultats ont été envoyés à ton professeur.");
-                btn.innerText = "Résultats envoyés";
-                btn.style.background = "#94a3b8";
+                const result = await response.json();
+
+                if (result.success) {
+                    addMsg("bot", "✅ <b>Succès !</b> Tes résultats ont été envoyés par e-mail.");
+                    btn.innerText = "Résultats envoyés";
+                    btn.style.background = "#94a3b8";
+                } else {
+                    throw new Error();
+                }
             } catch (error) {
-                addMsg("bot", "❌ Erreur d'envoi. Réessaie plus tard.");
+                addMsg("bot", "❌ Erreur. Vérifiez votre connexion.");
                 btn.disabled = false;
                 btn.innerText = "Réessayer l'envoi";
             }
